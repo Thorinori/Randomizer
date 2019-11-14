@@ -1,4 +1,4 @@
---Table to string Conversion from http://lua-users.org/wiki/TableUtils
+--Table to string Conversion functionsfrom http://lua-users.org/wiki/TableUtils
 function table.val_to_str ( v )
   if "string" == type( v ) then
     v = string.gsub( v, "\n", "\\n" )

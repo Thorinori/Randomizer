@@ -1,3 +1,4 @@
+--Based on the IO from the IUP Examples
 function readfile(fname)
     local tmpfile = io.open(fname, "r")
     if ( not tmpfile) then
@@ -34,9 +35,6 @@ end
 function save (name, value, saved, fname)
       saved = saved or {}       -- initial value
       fname:write(name, " = ")
-      if(type(value) == "function") then
-            value = tostring(value)
-      end
       if type(value) == "number" or type(value) == "string" then
         fname:write(basicSerialize(value), "\n")
       elseif type(value) == "table" then
