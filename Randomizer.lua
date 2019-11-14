@@ -14,10 +14,27 @@ require("Modules/FileIO")
 require("Modules/TableFunctions")
 require("Modules/Components")
 
+--Misc Functions
+
 function debug(s)
   if debug_mode then
     multitext.append = s
   end
+end
+
+function reset_random()
+  comp_actions = {}
+  local child = iup.GetNextChild(randomization_panel,nil)
+  while(child) do
+      local old_child = child
+      child = iup.GetNextChild(randomization_panel,old_child)
+      old_child:detach()
+      old_child:destroy()
+  end
+  local title = iup.label{title="Randomizer", alignment = "ACENTER", padding="0x5"}
+  iup.Append(randomization_panel, title)
+  iup.Map(title)
+  iup.Refresh(randomization_panel)
 end
 
 --Instantiate seed
@@ -29,38 +46,37 @@ config.app_name = "Randomizer"
 config:Load()
 
 --Globals
-debug_mode = true
+debug_mode = true -- For debug print statements into the multitext console (Primary use of the console)
 comp_actions = {} -- access them with comp_actions[n]() to call all in one loop
-data = {}
-filedata = {}
-current_file = ''
-create_rule_panel = iup.hbox{padding="10x5"}
-randomization_panel = iup.vbox{visible="NO", padding="10x5", alignment = "ACENTER"}
-randomization_scroll = iup.scrollbox{randomization_panel, alignment = "ARIGHT", padding="10x5"}
-available_scripts_panel =iup.vbox{visible="YES"}
-available_scripts = {}
-randomize_all_button = iup.button{title = "Randomize All", padding = "5x5"}
-main_panel = iup.vbox{create_rule_panel, available_scripts_panel,randomization_scroll, randomize_all_button, alignment = "ACENTER"}
-randomization_panel.alignment = "ACENTER"
-randomization_panel.padding = "10x2"
-randomization_panel.expandchildren = "YES"
+data = {} --Stores all active data for current profile
+filedata = {} --Intermediate step to go from stored table format to used table format stored in data
+current_file = '' --Path to current profile file
 
+--Primary Components
+create_rule_panel = iup.vbox{iup.label{title="Rule Creator", alignment = "ALEFT", padding="10x5"}, padding="10x5"}
+
+randomization_panel = iup.vbox{iup.label{title="Randomizer", alignment = "ALEFT", padding="10x5"}, visible="YES", padding="10x5", alignment = "ALEFT"}
+randomization_scroll = iup.scrollbox{randomization_panel, alignment = "ALEFT", padding="10x5", childoffset="90x5"}
+
+extra_container = iup.hbox{create_rule_panel,randomization_scroll, padding="10x10"}
+randomize_all_button = iup.button{title = "Randomize All", padding = "10x5"}
+
+main_panel = iup.vbox{extra_container, iup.hbox{randomize_all_button,alignment="ACENTER"}, alignment = "ACENTER"}
+
+--Stuff for quick open menu idea
+available_scripts_panel =iup.vbox{visible="YES"} 
+available_scripts = {}
+
+--Setup multitext "console"
 local visible = "NO"
 local console = config:GetVariable("MainWindow", "Console")
 if console == "YES" then
  visible = "YES"
 end
-multitext = iup.text{multiline = "YES", expand = "HORIZONTAL", scrollbar = "YES", visiblelines = 12, alignment = "ALEFT", config = config, visible=visible}
---fill = iup.fill{}
---iup.Append(main_panel,fill)
---iup.Map(fill)
-iup.Append(main_panel,multitext)
-iup.Map(multitext)
-iup.Refresh(randomization_panel)   
+multitext = iup.text{multiline = "YES", expand = "HORIZONTAL", scrollbar = "YES", visiblelines = 12, alignment = "ALEFT", config = config, visible=visible, readonly = "YES"}
 
-
+--Setup buttont hat randomized all fields for profile
 function randomize_all_button:action()
-  
   for _, item in ipairs(comp_actions) do
       item()
       for i = 1, math.random(10) do --Extra random calls to make smaller ranges more varied
@@ -78,6 +94,7 @@ local save_button = iup.item{title = "Save...\t Ctrl+S"}
 local saveas_button = iup.item{title = "Save as.."}
 local exit_button = iup.item{title = "Exit"}
 
+--File Menu Button Functions
 function open_button:action()
   local open_file_window = iup.filedlg{
     dialogtype = "OPEN",
@@ -89,6 +106,7 @@ function open_button:action()
   open_file_window:popup(iup.CENTER,iup.CENTER)
 
   if (tonumber(open_file_window.status) ~= -1) then
+    reset_random()
     local fname = open_file_window.value
     filedata = readfile(fname)
     debug("Filedata: ".. filedata)
@@ -96,7 +114,9 @@ function open_button:action()
     current_file = fname
     main_win.title = current_file .. "- Randomizer"
     iup.Refresh(main_win)
+    i = 1
     for k,v in ipairs(data) do
+   
         local func = v["func"].."("
         for key, val in ipairs(v["args"]) do
             debug("Type of argument: "..type(val))
@@ -110,37 +130,15 @@ function open_button:action()
         end
         func = func:sub(1,-2)
         func = func..")"
+
         debug(func)
         load(func)()
+        i = i + 1
     end
     debug(table.tostring(data))
   end
 
   open_file_window:destroy()
-end
-
-function open_shortcut(fname)
-    filedata = readfile(fname)
-    debug("Filedata: ".. filedata)
-    load(filedata)()
-    current_file = fname
-    main_win.title = current_file .. "- Randomizer"
-    iup.Refresh(main_win)
-    for k,v in ipairs(data) do
-      local func = v["func"].."("
-      for key, val in ipairs(v["args"]) do
-          debug("Type of argument: "..type(val))
-          if type(val) == "string" then
-            func = func .."\"".. tostring(val).."\","
-          else
-            func = func .. val
-          end
-      end
-      func = func..")"
-      debug(func)
-      load(func)()
-  end
-  debug(table.tostring(data))
 end
 
 function save_button:action()
@@ -184,7 +182,7 @@ local file_submenu = iup.submenu{file_menu, title="File"}
 local about_button = iup.item{title="About"}
 
 function about_button:action()
-  iup.Message("About", "Randomizer\n\nAuthor:\t Joseph Pace (Thorinori)")
+  iup.Message("About", "Randomizer\nAuthor: Joseph Pace (Thorinori)")
 end
 
 local help_menu = iup.menu{about_button}
@@ -192,34 +190,228 @@ local help_submenu = iup.submenu{help_menu, title="Help"}
 
 --View Menu
 
-local console_button = iup.item{title="About"}
+local console_button = iup.item{title="Console"}
 
 function console_button:action()
   local curr = multitext.visible
   if curr == "YES" then
     multitext.visible = "NO"
+    multitext:detach()
     config:SetVariable("MainWindow", "Console", "NO")
   else
-    config:SetVariable("MainWindow", "Console", "YES")
     multitext.visible = "YES"
+    iup.Append(main_panel,multitext)
+    iup.Map(multitext)
+    iup.Refresh(randomization_panel)   
+    config:SetVariable("MainWindow", "Console", "YES")
   end
-  iup.Map(multitext)
   iup.Refresh(main_win)
   iup.RefreshChildren(main_win)
 end
 
 local view_menu = iup.menu{console_button}
-local view_submenu = iup.submenu{view_menu, title="Toggle Console"}
+local view_submenu = iup.submenu{view_menu, title="View"}
 
 --Main Menu
 local menu = iup.menu{file_submenu,view_submenu,help_submenu}
 
---Create Rule Section
-local create_rule_dropdown_button = iup.list{"Random Number", "Random Choice from List", dropdown="YES"}
-iup.Append(create_rule_panel,create_rule_dropdown_button)
+--Rule Creator Section
+
+random_number_panel = iup.vbox{visible="NO"}
+random_list_panel = iup.vbox{visible="NO"}
+seed_panel = iup.vbox{visible="NO"}
+
+layers = iup.zbox{random_number_panel,random_list_panel,seed_panel}
+
+local instruction_label = iup.label{title = "Select a type of rule from the dropdown below"}
+local create_rule_dropdown_button = iup.list{"Random Number", "Random Choice from List", "Seed", dropdown="YES", padding="10x10", margin="10x10"}
+
+
+rule_title = iup.gridbox{iup.label{title="Rule Name: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, padding="10x10", normalizesize="BOTH",
+  numdiv="2",orientation="HORIZONTAL", alignment = "ALEFT"}
+
+rand_num_min = iup.gridbox{iup.label{title="Minimum Value: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
+  numdiv="2",orientation="HORIZONTAL"}
+rand_num_max = iup.gridbox{iup.label{title="Maximum Value: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
+  numdiv="2",orientation="HORIZONTAL"}
+
+rand_list = iup.vbox{iup.label{title="List of Elements (One per line):"}, iup.text{multiline="YES", visiblecolumns="20", visiblelines="20", alignment="ALEFT"}, 
+    padding="10x10",
+    alignment="ACENTER"
+  }
+
+max_seed_length = iup.gridbox{iup.label{title="Max Seed Length: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
+  numdiv="2",orientation="HORIZONTAL"}
+
+seed_valid_chars = iup.vbox{iup.label{title="List of Valid Characters (One per line):", padding="10x10"}, iup.text{multiline="YES", visiblecolumns="20", visiblelines="20", alignment="ALEFT"}, 
+    padding="10x10",
+    alignment="ACENTER"
+  }
+
+local blank = iup.fill{}
+
+repetition_label = iup.label{title="Number of times to add this rule: ", padding="5x5"}
+repetition_text = iup.text{value="1"}
+repetition_panel = iup.vbox{repetition_label,repetition_text, padding="5x1"}
+
+add_button = iup.button{title="Add Rule", alignment = "ACENTER", padding="5x15"}
+add_button_panel = iup.hbox{add_button,repetition_panel,alignment="ACENTER", padding="5x10"}
+
+
+
+iup.Append(create_rule_panel,instruction_label)
+iup.Map(instruction_label)
 iup.Refresh(create_rule_panel)
 
---[[
+iup.Append(create_rule_panel,create_rule_dropdown_button)
+iup.Map(create_rule_dropdown_button)
+iup.Refresh(create_rule_panel)
+
+iup.Append(create_rule_panel,rule_title)
+iup.Map(rule_title)
+iup.Refresh(create_rule_panel)
+
+iup.Append(random_number_panel,rand_num_min)
+iup.Map(rand_num_min)
+iup.Refresh(random_number_panel)
+
+iup.Append(random_number_panel,rand_num_max)
+iup.Map(rand_num_max)
+iup.Refresh(random_number_panel)
+
+iup.Append(random_list_panel,rand_list)
+iup.Map(rand_list)
+iup.Refresh(random_list_panel)
+
+iup.Append(seed_panel,max_seed_length)
+iup.Map(max_seed_length)
+iup.Refresh(seed_panel)
+
+iup.Append(seed_panel,seed_valid_chars)
+iup.Map(seed_valid_chars)
+iup.Refresh(seed_panel)
+
+iup.Append(create_rule_panel,layers)
+iup.Map(layers)
+iup.Refresh(create_rule_panel)
+
+iup.Append(create_rule_panel,blank)
+iup.Map(blank)
+iup.Refresh(create_rule_panel)
+
+iup.Append(create_rule_panel,add_button_panel)
+iup.Map(add_button_panel)
+iup.Refresh(create_rule_panel)
+
+--Change panels based on dropdown
+function create_rule_dropdown_button:action(str, index, state)
+    if(index == 1 and state == 1) then
+        random_number_panel.visible = "YES"
+        random_list_panel.visible = "NO"
+        seed_panel.visible = "NO"
+        reset_inputs()
+    elseif(index == 2 and state == 1) then
+        random_number_panel.visible = "NO"
+        random_list_panel.visible = "YES"
+        seed_panel.visible = "NO"
+        reset_inputs()
+    elseif(index == 3 and state == 1) then 
+        random_number_panel.visible = "NO"
+        random_list_panel.visible = "NO"
+        seed_panel.visible = "YES"
+        reset_inputs()
+        iup.GetChild(rule_title,1).value = "Seed"
+    end
+end
+
+--String Splitting for Adding Lists (Found at https://stackoverflow.com/questions/1426954/split-string-in-lua)
+function mysplit (inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        local t={}
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                table.insert(t, str)
+        end
+        return t
+end
+
+--Clear input fields
+function reset_inputs()
+  iup.GetChild(rand_list, 1).value = ""
+  iup.GetChild(rand_num_min, 1).value = ""
+  iup.GetChild(rand_num_max, 1).value = ""
+  iup.GetChild(rule_title, 1).value = ""
+  iup.GetChild(seed_valid_chars, 1).value = ""
+  iup.GetChild(max_seed_length, 1).value = ""
+  iup.GetChild(repetition_panel, 1).value = "1"
+end
+
+--Add Rule to Profile and Create buttons etc as needed
+function add_button:action()
+  local reps = tonumber(repetition_text.value)
+  if(reps) then
+      if(create_rule_dropdown_button.value == "1") then
+          local min = tonumber(iup.GetChild(rand_num_min, 1).value)
+          local max = tonumber(iup.GetChild(rand_num_max, 1).value)
+          if((max and min) and (min <= max)) then
+            for i=1,reps do
+              generate_random_number(iup.GetChild(rule_title,1).value,min, max, #data + 1)
+              local tmp = {["func"] = "generate_random_number", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = min, [3] = max}}
+              table.insert(data,tmp)
+            end
+            reset_inputs()
+          end
+      elseif(create_rule_dropdown_button.value == "2") then
+        local entered = iup.GetChild(rand_list,1).value
+        local lst = mysplit(entered, "\n")
+        for i=1,reps do
+          generate_from_list(iup.GetChild(rule_title,1).value, lst)
+          local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst}}
+          table.insert(data,tmp)
+        end
+          reset_inputs()
+      elseif(create_rule_dropdown_button.value == "3") then
+        local entered = iup.GetChild(seed_valid_chars,1).value
+        local lst = mysplit(entered, "\n")
+        if(tonumber(iup.GetChild(max_seed_length,1).value)) then
+          for i=1,reps do
+            generate_seed(iup.GetChild(rule_title,1).value, tonumber(iup.GetChild(max_seed_length,1).value), lst)
+            local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = tonumber(iup.GetChild(max_seed_length,1).value) , [3] = lst}}
+            table.insert(data,tmp)
+            reset_inputs()
+          end
+          reset_inputs()
+        end
+      end
+    end
+end
+
+--[[ For Potential quick open menu support
+function open_shortcut(fname)
+    filedata = readfile(fname)
+    debug("Filedata: ".. filedata)
+    load(filedata)()
+    current_file = fname
+    main_win.title = current_file .. "- Randomizer"
+    iup.Refresh(main_win)
+    for k,v in ipairs(data) do
+      local func = v["func"].."("
+      for key, val in ipairs(v["args"]) do
+          debug("Type of argument: "..type(val))
+          if type(val) == "string" then
+            func = func .."\"".. tostring(val).."\","
+          else
+            func = func .. val
+          end
+      end
+      func = func..")"
+      debug(func)
+      load(func)()
+  end
+  debug(table.tostring(data))
+end
+
 --Available Scripts Panel (Easy Open Panel)
 debug("Looking for scripts")
 for file in lfs.dir("./Scripts") do
