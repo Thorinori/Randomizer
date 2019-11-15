@@ -288,24 +288,27 @@ local create_rule_dropdown_button = iup.list{"Random Number", "Random Choice fro
 
 
 rule_title = iup.gridbox{iup.label{title="Rule Name: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, padding="10x10", normalizesize="BOTH",
-  numdiv="2",orientation="HORIZONTAL", alignment = "ALEFT"}
+  numdiv="2",orientation="HORIZONTAL", alignment = "ALEFT", visible="NO"}
 
 rand_num_min = iup.gridbox{iup.label{title="Minimum Value: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
   numdiv="2",orientation="HORIZONTAL"}
 rand_num_max = iup.gridbox{iup.label{title="Maximum Value: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
   numdiv="2",orientation="HORIZONTAL"}
 
-rand_list = iup.vbox{iup.label{title="List of Elements (One per line):"}, iup.text{multiline="YES", visiblecolumns="20", visiblelines="20", alignment="ALEFT"}, 
+rand_list = iup.vbox{iup.label{title="List of Elements (One per line):"}, iup.text{multiline="YES", visiblecolumns="22", visiblelines="20", alignment="ALEFT"}, 
     padding="10x10",
-    alignment="ACENTER"
+    alignment="ACENTER",
+    margin="0x10"
   }
 
 max_seed_length = iup.gridbox{iup.label{title="Max Seed Length: "}, iup.text{alignment="ALEFT", visiblecolumns="10"}, alignment="ARIGHT", padding="10x10", normalizesize="BOTH",
   numdiv="2",orientation="HORIZONTAL"}
 
-seed_valid_chars = iup.vbox{iup.label{title="List of Valid Characters (One per line):", padding="10x10"}, iup.text{multiline="YES", visiblecolumns="20", visiblelines="20", alignment="ALEFT"}, 
+seed_valid_chars = iup.vbox{iup.label{title="List of Valid Characters (One per line):", padding="10x10"}, iup.text{multiline="YES", visiblecolumns="22", visiblelines="20", 
+    alignment="ALEFT"}, 
     padding="10x10",
-    alignment="ACENTER"
+    alignment="ACENTER",
+    margin="0x10"
   }
 
 local blank = iup.fill{}
@@ -366,16 +369,19 @@ iup.Refresh(create_rule_panel)
 --Change panels based on dropdown
 function create_rule_dropdown_button:action(str, index, state)
     if(index == 1 and state == 1) then
+        rule_title.visible = "YES"
         random_number_panel.visible = "YES"
         random_list_panel.visible = "NO"
         seed_panel.visible = "NO"
         reset_inputs()
     elseif(index == 2 and state == 1) then
+        rule_title.visible = "YES"
         random_number_panel.visible = "NO"
         random_list_panel.visible = "YES"
         seed_panel.visible = "NO"
         reset_inputs()
     elseif(index == 3 and state == 1) then 
+        rule_title.visible = "YES"
         random_number_panel.visible = "NO"
         random_list_panel.visible = "NO"
         seed_panel.visible = "YES"

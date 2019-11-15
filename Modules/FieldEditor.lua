@@ -6,7 +6,7 @@ function edit_fields(name)
         local number_editor_1_box = iup.hbox{iup.label{title = "Minimum: "}, number_editor_1, margin="2x10"}
         local number_editor_2_box = iup.hbox{iup.label{title = "Maximum: "}, number_editor_2, margin="2x10"}
         local editor_button_box = iup.hbox{alignment="ACENTER"}
-        local editor_panel = iup.vbox{number_editor_1_box,number_editor_2_box,editor_button_box, alignment="ACENTER"}
+        local editor_panel = iup.vbox{number_editor_1_box,number_editor_2_box, iup.fill{}, editor_button_box, alignment="ACENTER"}
 
         local save_button = iup.button{title = "Save Changes to Numbers"}
         local cancel_button = iup.button{title = "Cancel Changes to Numbers"}
@@ -54,7 +54,7 @@ function edit_fields(name)
             title = "Field Editor",
             dialogframe = "Yes",
             parentdialog = main_win,
-            size="HALFxHALF"
+            size="QUARTERxQUARTER"
         }
 
         extra_dialogs["field_editor"] = field_editor_dialog
