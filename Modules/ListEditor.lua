@@ -29,7 +29,7 @@ function edit_list(prov_list, name)
                     if(v["args"][1] == name) then
                         local tmp =  mysplit(list_editor.value, "\n")
                         v["args"][2] = tmp
-                        local tmpfile = "./Scripts/tmp/tmp.lua"
+                        local tmpfile = "./Scripts/tmp.lua"
                         writefile(tmpfile, data)
                         list_editor.value = ""
                         iup.Hide(list_editor_dialog)
