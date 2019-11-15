@@ -47,10 +47,11 @@ config:Load()
 
 --Globals
 debug_mode = true -- For debug print statements into the multitext console (Primary use of the console)
+extra_dialogs = {}
 comp_actions = {} -- access them with comp_actions[n]() to call all in one loop
 data = {} --Stores all active data for current profile
 filedata = {} --Intermediate step to go from stored table format to used table format stored in data
-current_file = '' --Path to current profile file
+current_file = "" --Path to current profile file
 
 --Primary Components
 create_rule_panel = iup.vbox{iup.label{title="Rule Creator", alignment = "ALEFT", padding="10x5"}, padding="10x5"}
@@ -73,7 +74,8 @@ local console = config:GetVariable("MainWindow", "Console")
 if console == "YES" then
  visible = "YES"
 end
-multitext = iup.text{multiline = "YES", expand = "HORIZONTAL", scrollbar = "YES", visiblelines = 12, alignment = "ALEFT", config = config, visible=visible, readonly = "YES"}
+multitext = iup.text{multiline = "YES", expand = "HORIZONTAL", scrollbar = "YES", visiblelines = 12, alignment = "ALEFT", 
+  config = config, visible=visible, readonly = "YES", wordwrap="YES"}
 
 --Setup buttont hat randomized all fields for profile
 function randomize_all_button:action()
@@ -83,18 +85,30 @@ function randomize_all_button:action()
         math.random()
       end
   end
+  debug(table.tostring(data))
 end
 
 --Menu Seperator
 local horiz_sep = iup.separator{}
 
 --File Menu
+local new_button = iup.item{title = "New..."}
 local open_button = iup.item{title = "Open...\t Ctrl+O"}
 local save_button = iup.item{title = "Save...\t Ctrl+S"}
 local saveas_button = iup.item{title = "Save as.."}
 local exit_button = iup.item{title = "Exit"}
 
 --File Menu Button Functions
+
+function new_button:action()
+  reset_random()
+  data = {}
+  filedata = {}
+  comp_actions = {}
+  current_file = ""
+  main_win.title = "Randomizer"
+end
+
 function open_button:action()
   local open_file_window = iup.filedlg{
     dialogtype = "OPEN",
@@ -123,7 +137,7 @@ function open_button:action()
             if type(val) == "string" then
               func = func .."\"".. tostring(val).."\","
             elseif type(val) == "table" then
-              func = func .. table.tostring(val).."}"
+              func = func .. table.tostring(val)..","
             else
               func = func .. val..","
             end
@@ -141,6 +155,42 @@ function open_button:action()
   open_file_window:destroy()
 end
 
+function reload_file(fname)
+    reset_random()
+    local fname = fname
+    print("Attempting to reload " ..fname.."\n")
+    filedata = {}
+    filedata = readfile(fname)
+    debug("Filedata: ".. filedata)
+    load(filedata)()
+    current_file = fname
+    main_win.title = current_file .. "- Randomizer"
+    iup.Refresh(main_win)
+    i = 1
+    for k,v in ipairs(data) do
+   
+        local func = v["func"].."("
+        for key, val in ipairs(v["args"]) do
+            debug("Type of argument: "..type(val))
+            if type(val) == "string" then
+              func = func .."\"".. tostring(val).."\","
+            elseif type(val) == "table" then
+              func = func .. table.tostring(val)..","
+            else
+              func = func .. val..","
+            end
+        end
+        func = func:sub(1,-2)
+        func = func..")"
+
+        debug(func)
+        load(func)()
+        i = i + 1
+    end
+    debug(table.tostring(data))
+
+end
+
 function save_button:action()
   if(current_file ~= '') then
     writefile(current_file, data)
@@ -149,23 +199,36 @@ function save_button:action()
   end
 end
 
-function saveas_button:action()
+function saveas()
   local saveas_file_window = iup.filedlg{
     dialogtype = "SAVE",
     filter = "*.lua",
-    directory = "./Scripts"
+    directory = "./Scripts",
+    parentdialog=main_win
   }
 
   saveas_file_window:popup(iup.CENTER,iup.CENTER)
   debug("Hit Save As")
 
   debug("Starting Save As")
-  fname = saveas_file_window.value
-  writefile(fname, data)
-  debug("Ended Save As")
-  current_file = fname    main_win.title = current_file .. "- Randomizer"
-  iup.Refresh(main_win)
-  saveas_file_window:destroy()
+  print(tonumber(saveas_file_window.status) ~= -1)
+  if(tonumber(saveas_file_window.status) ~= -1) then
+    local fname = saveas_file_window.value .. ".lua"
+    writefile(fname, data)
+    debug("Ended Save As")
+    current_file = fname
+    main_win.title = current_file .. "- Randomizer"
+    iup.Refresh(main_win)
+    saveas_file_window:destroy()
+    return fname
+  else
+    debug("Save Failed")
+    saveas_file_window:destroy()
+  end
+end
+
+function saveas_button:action()
+  saveas()
 end
 
 function exit_button:action()
@@ -175,7 +238,7 @@ function exit_button:action()
   return iup.CLOSE
 end
 
-local file_menu = iup.menu{open_button,save_button,saveas_button,horiz_sep,exit_button}
+local file_menu = iup.menu{new_button,open_button,save_button,saveas_button,horiz_sep,exit_button}
 local file_submenu = iup.submenu{file_menu, title="File"}
 
 --Help Menu
@@ -377,7 +440,7 @@ function add_button:action()
         if(tonumber(iup.GetChild(max_seed_length,1).value)) then
           for i=1,reps do
             generate_seed(iup.GetChild(rule_title,1).value, tonumber(iup.GetChild(max_seed_length,1).value), lst)
-            local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = tonumber(iup.GetChild(max_seed_length,1).value) , [3] = lst}}
+            local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
             table.insert(data,tmp)
             reset_inputs()
           end
