@@ -276,12 +276,12 @@ local view_submenu = iup.submenu{view_menu, title="View"}
 local menu = iup.menu{file_submenu,view_submenu,help_submenu}
 
 --Rule Creator Section
-
+blank_panel = iup.vbox{visible="YES"}
 random_number_panel = iup.vbox{visible="NO"}
 random_list_panel = iup.vbox{visible="NO"}
 seed_panel = iup.vbox{visible="NO"}
 
-layers = iup.zbox{random_number_panel,random_list_panel,seed_panel}
+layers = iup.zbox{blank_panel,random_number_panel,random_list_panel,seed_panel}
 
 local instruction_label = iup.label{title = "Select a type of rule from the dropdown below"}
 local create_rule_dropdown_button = iup.list{"Random Number", "Random Choice from List", "Seed", dropdown="YES", padding="10x10", margin="10x10"}
@@ -310,7 +310,7 @@ seed_valid_chars = iup.vbox{iup.label{title="List of Valid Characters (One per l
 
 local blank = iup.fill{}
 
-repetition_label = iup.label{title="Number of times to add this rule: ", padding="5x5"}
+repetition_label = iup.label{title="Number of times to add this rule:", padding="5x5", tip = "Warning: This will append a number to the rule title"}
 repetition_text = iup.text{value="1"}
 repetition_panel = iup.vbox{repetition_label,repetition_text, padding="5x1"}
 
@@ -422,10 +422,12 @@ function add_button:action()
         if(create_rule_dropdown_button.value == "1") then
             local min = tonumber(iup.GetChild(rand_num_min, 1).value)
             local max = tonumber(iup.GetChild(rand_num_max, 1).value)
+            local orig_title = iup.GetChild(rule_title,1).value
             if((max and min) and (min <= max)) then
               for i=1,reps do
-                generate_random_number(iup.GetChild(rule_title,1).value,min, max, #data + 1)
-                local tmp = {["func"] = "generate_random_number", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = min, [3] = max}}
+                if( reps > 1 ) then title= orig_title..tostring(i) else title = orig_title end
+                generate_random_number(title,min, max, #data + 1)
+                local tmp = {["func"] = "generate_random_number", ["args"] = {[1] = title, [2] = min, [3] = max}}
                 table.insert(data,tmp)
               end
               reset_inputs()
@@ -433,19 +435,23 @@ function add_button:action()
         elseif(create_rule_dropdown_button.value == "2") then
           local entered = iup.GetChild(rand_list,1).value
           local lst = mysplit(entered, "\n")
+          local orig_title = iup.GetChild(rule_title,1).value
           for i=1,reps do
-            generate_from_list(iup.GetChild(rule_title,1).value, lst)
-            local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst}}
+            if( reps > 1 ) then title= orig_title..tostring(i)  else title = orig_title end
+            generate_from_list(title, lst)
+            local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = title, [2] = lst}}
             table.insert(data,tmp)
           end
             reset_inputs()
         elseif(create_rule_dropdown_button.value == "3") then
           local entered = iup.GetChild(seed_valid_chars,1).value
           local lst = mysplit(entered, "\n")
+          local orig_title = iup.GetChild(rule_title,1).value
           if(tonumber(iup.GetChild(max_seed_length,1).value)) then
             for i=1,reps do
-              generate_seed(iup.GetChild(rule_title,1).value, lst, tonumber(iup.GetChild(max_seed_length,1).value))
-              local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
+              if( reps > 1 ) then title= orig_title..tostring(i)  else title = orig_title end
+              generate_seed(title, lst, tonumber(iup.GetChild(max_seed_length,1).value))
+              local tmp = {["func"] = "generate_seed", ["args"] = {[1] = title, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
               table.insert(data,tmp)
               reset_inputs()
             end
