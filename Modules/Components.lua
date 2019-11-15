@@ -1,4 +1,5 @@
 require("Modules/ListEditor")
+require("Modules/FieldEditor")
 
 --For a quick open menu idea
 function checkChildren()
@@ -23,7 +24,7 @@ function generate_random_number(name, minimum, maximum)
     end
 
     function modify_button:action()
-        rand_label.title = "This will be a random value between ".. minimum.." and "..maximum
+        edit_fields(name)
     end
 
     local comp = iup.vbox{comp_label,minihbox, alignment = "ALEFT", margin="2x2"}

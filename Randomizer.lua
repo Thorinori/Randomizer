@@ -163,8 +163,6 @@ function reload_file(fname)
     filedata = readfile(fname)
     debug("Filedata: ".. filedata)
     load(filedata)()
-    current_file = fname
-    main_win.title = current_file .. "- Randomizer"
     iup.Refresh(main_win)
     i = 1
     for k,v in ipairs(data) do
