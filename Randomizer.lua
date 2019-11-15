@@ -166,7 +166,6 @@ function reload_file(fname)
     iup.Refresh(main_win)
     i = 1
     for k,v in ipairs(data) do
-   
         local func = v["func"].."("
         for key, val in ipairs(v["args"]) do
             debug("Type of argument: "..type(val))
