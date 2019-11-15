@@ -409,41 +409,52 @@ end
 
 --Add Rule to Profile and Create buttons etc as needed
 function add_button:action()
-  local reps = tonumber(repetition_text.value)
-  if(reps) then
-      if(create_rule_dropdown_button.value == "1") then
-          local min = tonumber(iup.GetChild(rand_num_min, 1).value)
-          local max = tonumber(iup.GetChild(rand_num_max, 1).value)
-          if((max and min) and (min <= max)) then
+  local item_exists = false
+  for k,v in ipairs(data) do
+      if(v["args"][1] == iup.GetChild(rule_title,1).value) then
+          item_exists = true
+          break
+      end
+  end
+  if(not item_exists) then
+    local reps = tonumber(repetition_text.value)
+    if(reps) then
+        if(create_rule_dropdown_button.value == "1") then
+            local min = tonumber(iup.GetChild(rand_num_min, 1).value)
+            local max = tonumber(iup.GetChild(rand_num_max, 1).value)
+            if((max and min) and (min <= max)) then
+              for i=1,reps do
+                generate_random_number(iup.GetChild(rule_title,1).value,min, max, #data + 1)
+                local tmp = {["func"] = "generate_random_number", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = min, [3] = max}}
+                table.insert(data,tmp)
+              end
+              reset_inputs()
+            end
+        elseif(create_rule_dropdown_button.value == "2") then
+          local entered = iup.GetChild(rand_list,1).value
+          local lst = mysplit(entered, "\n")
+          for i=1,reps do
+            generate_from_list(iup.GetChild(rule_title,1).value, lst)
+            local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst}}
+            table.insert(data,tmp)
+          end
+            reset_inputs()
+        elseif(create_rule_dropdown_button.value == "3") then
+          local entered = iup.GetChild(seed_valid_chars,1).value
+          local lst = mysplit(entered, "\n")
+          if(tonumber(iup.GetChild(max_seed_length,1).value)) then
             for i=1,reps do
-              generate_random_number(iup.GetChild(rule_title,1).value,min, max, #data + 1)
-              local tmp = {["func"] = "generate_random_number", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = min, [3] = max}}
+              generate_seed(iup.GetChild(rule_title,1).value, lst, tonumber(iup.GetChild(max_seed_length,1).value))
+              local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
               table.insert(data,tmp)
+              reset_inputs()
             end
             reset_inputs()
           end
-      elseif(create_rule_dropdown_button.value == "2") then
-        local entered = iup.GetChild(rand_list,1).value
-        local lst = mysplit(entered, "\n")
-        for i=1,reps do
-          generate_from_list(iup.GetChild(rule_title,1).value, lst)
-          local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst}}
-          table.insert(data,tmp)
-        end
-          reset_inputs()
-      elseif(create_rule_dropdown_button.value == "3") then
-        local entered = iup.GetChild(seed_valid_chars,1).value
-        local lst = mysplit(entered, "\n")
-        if(tonumber(iup.GetChild(max_seed_length,1).value)) then
-          for i=1,reps do
-            generate_seed(iup.GetChild(rule_title,1).value, tonumber(iup.GetChild(max_seed_length,1).value), lst)
-            local tmp = {["func"] = "generate_seed", ["args"] = {[1] = iup.GetChild(rule_title,1).value, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
-            table.insert(data,tmp)
-            reset_inputs()
-          end
-          reset_inputs()
         end
       end
+    else
+      iup.Message("Repeated Rule Name", "Please use a Unique Rule Name (That one exists already)")
     end
 end
 
