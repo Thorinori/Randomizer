@@ -437,6 +437,8 @@ function add_button:action()
                 table.insert(data,tmp)
               end
               reset_inputs()
+            else
+              iup.Message("Invalid Input", "Minimum and Maximum must both be numbers")
             end
         elseif(create_rule_dropdown_button.value == "2") then
           local entered = iup.GetChild(rand_list,1).value
