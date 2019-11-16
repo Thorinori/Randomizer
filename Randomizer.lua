@@ -450,7 +450,7 @@ function add_button:action()
             local tmp = {["func"] = "generate_from_list", ["args"] = {[1] = title, [2] = lst}}
             table.insert(data,tmp)
           end
-            reset_inputs()
+          reset_inputs()
         elseif(create_rule_dropdown_button.value == "3") then
           local entered = iup.GetChild(seed_valid_chars,1).value
           local lst = mysplit(entered, "\n")
@@ -461,7 +461,6 @@ function add_button:action()
               generate_seed(title, lst, tonumber(iup.GetChild(max_seed_length,1).value))
               local tmp = {["func"] = "generate_seed", ["args"] = {[1] = title, [2] = lst, [3] = tonumber(iup.GetChild(max_seed_length,1).value)}}
               table.insert(data,tmp)
-              reset_inputs()
             end
             reset_inputs()
           end
