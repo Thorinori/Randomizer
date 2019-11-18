@@ -4,12 +4,13 @@
 local sep = package.config:sub(1,1)
 if(sep == "/") then
     package.cpath = package.cpath .. ";./libs/UNIX/iup/Lua53/lib?53.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup/?.so;"
 else
     package.cpath = package.cpath .. ";./libs/Windows/iup/Lua53/?53.dll;"
 end
 
 iup = require("iuplua")
-lfs = require("lfs")
+--lfs = require("lfs")
 require("Modules/FileIO")
 require("Modules/TableFunctions")
 require("Modules/Components")
