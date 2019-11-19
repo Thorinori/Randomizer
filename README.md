@@ -2,10 +2,13 @@
 A profile based randomizer written in Lua
 
 WARNING: Not functional on Windows natively yet.
+Known Supported Systems: 
+Ubuntu 18.04+ 
+Any distro that uses GTK3+ *SHOULD* be fine as far as I am aware. Please let me know otherwise.
 
 REQUIREMENTS:
 Lua 5.3+
-Ubuntu 18.04+ (Other distros not tested yet, 16 and earlier don't work though for Ubuntu)
+
 
 Instructions:
 1) Clone Repo
