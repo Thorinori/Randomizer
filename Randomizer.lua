@@ -3,8 +3,12 @@
 --Maybe not needed. Not needed especially until Windows support is the focus.
 local sep = package.config:sub(1,1)
 if(sep == "/") then
-    package.cpath = package.cpath .. ";./libs/UNIX/iup/Lua53/lib?53.so;"
-    package.cpath = package.cpath .. ";./libs/UNIX/iup/?.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/lua/5.3/?.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/lua/5.3/lib?53.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/lua/5.3/lib?.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/lib?53.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/lib?.so;"
+    package.cpath = package.cpath .. ";./libs/UNIX/iup_installed/?.so;"
 else
     package.cpath = package.cpath .. ";./libs/Windows/iup/Lua53/?53.dll;"
 end
