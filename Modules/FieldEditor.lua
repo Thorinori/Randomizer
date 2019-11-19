@@ -32,7 +32,7 @@ function edit_fields(name)
                     if(v["args"][1] == name) then
                         v["args"][2] = number_editor_1.value
                         v["args"][3] = number_editor_2.value
-                        local tmpfile = "./Scripts/tmp.lua"
+                        local tmpfile = "./Profiles/tmp.lua"
                         writefile(tmpfile, data)
                         number_editor_1.value = ""
                         number_editor_2.value = ""

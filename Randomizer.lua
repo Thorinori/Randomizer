@@ -119,7 +119,7 @@ function open_button:action()
     dialogtype = "OPEN",
     filter = "*.lua",
     filterinfo = "Lua Files",
-    directory = "./Scripts"
+    directory = "./Profiles"
   }
 
   open_file_window:popup(iup.CENTER,iup.CENTER)
@@ -205,7 +205,7 @@ function saveas()
   local saveas_file_window = iup.filedlg{
     dialogtype = "SAVE",
     filter = "*.lua",
-    directory = "./Scripts",
+    directory = "./Profiles",
     parentdialog=main_win
   }
 

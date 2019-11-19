@@ -39,7 +39,7 @@ function generate_random_number(name, minimum, maximum)
             end
         end
         if(item_removed) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -58,7 +58,7 @@ function generate_random_number(name, minimum, maximum)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -78,7 +78,7 @@ function generate_random_number(name, minimum, maximum)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -127,7 +127,7 @@ function generate_from_list(name, prov_list)
             end
         end
         if(item_removed) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -147,7 +147,7 @@ function generate_from_list(name, prov_list)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -166,7 +166,7 @@ function generate_from_list(name, prov_list)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -221,7 +221,7 @@ function generate_seed(name, prov_list, max_len)
             end
         end
         if(item_removed) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -240,7 +240,7 @@ function generate_seed(name, prov_list, max_len)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
@@ -259,7 +259,7 @@ function generate_seed(name, prov_list, max_len)
             end
         end
         if(item_moved) then
-            local tmpfile = "./Scripts/tmp.lua"
+            local tmpfile = "./Profiles/tmp.lua"
             writefile(tmpfile, data)
             reload_file(tmpfile)
             os.remove(tmpfile)
