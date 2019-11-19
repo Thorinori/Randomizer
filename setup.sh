@@ -1,0 +1,1 @@
+export LD_LIBRARY_PATH=`pwd`/libs/UNIX/iup_installed/:$LD_LIBRARY_PATH
